@@ -1,0 +1,148 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Default values
+output_dir="."
+recipe_files=()
+payload_files=()
+script="$(kpsewhich la-lua-opts-init.lua)"
+
+# Function to print usage information
+usage() {
+  >&2 cat <<EOF
+Usage: $(basename "$0") [OPTIONS] MAIN_FILE
+
+Options:
+  -o, --output=PATH           Set the output directory (default: current directory)
+      --output-directory=DIR  Alias for --output; forwarded to lualatex
+  -j, --jobname=NAME          Set the jobname
+      --recorder              Enables file recording
+  -r, --recipe=PATH           Specify one or more recipe files (PATH may be prefixed with NS: as namespace)
+  -p, --payload=PATH          Specify one or more payload files (PATH may be prefixed with NS:)
+  -g, --gitdir=PATH           Set the git directory (default: current directory)
+  -t, --tagging               Enable PDF tagging (boolean flag; no value)
+  -l, --lang=CODE             Set DocumentMetadata lang (default: en)
+      --pdfversion=VER        Set DocumentMetadata pdfversion (default: 2.0)
+      --pdfstandard=STD       Add a pdfstandard entry (can be repeated; defaults: ua-2 and a-4f)
+  -u, --uncompress            Enable uncompress in DocumentMetadata (default: compressed)
+      --draftmode             Compile in LaTeX draftmode (forwarded to lualatex)
+      --final                 Compile as final document (forwarded to lualatex)
+
+Example:
+  $(basename "$0") --output-directory out -j myjobname -r recipe.yaml --final main.tex
+EOF
+  exit 1
+}
+
+# Command for lualatex
+lualatex_cmd="lualatex --lua=${script}"
+
+# Parse options
+options="o:j:r:p:g:tl:u"
+long_options="output:,output-directory:,jobname:,recorder,recipe:,payload:,gitdir:,git-dir:,tagging,lang:,pdfversion:,pdfstandard:,uncompress,draftmode,final,interaction:"
+args=$(getopt -a -o "$options" -l "$long_options" -- "$@")
+if [[ $? -gt 0 ]]; then
+  usage
+fi
+
+# Evaluate the options
+eval set -- "${args}"
+while true; do
+  case $1 in
+    -o | --output | -output-directory | --output-directory)
+      output_dir="$2"
+      shift 2
+      ;;
+    -j | --jobname)
+      lualatex_cmd+=" --jobname=$2"
+      shift 2
+      ;;
+    --recorder | -recorder)
+      lualatex_cmd+=" --recorder"
+      shift 1
+      ;;
+    -r | --recipe)
+      recipe_files+=("$2")
+      shift 2
+      ;;
+    -p | --payload)
+      payload_files+=("$2")
+      shift 2
+      ;;
+    -g | --gitdir | --git-dir)
+      lualatex_cmd+=" --gitdir=$2"
+      shift 2
+      ;;
+    -t | --tagging)
+      lualatex_cmd+=" --tagging"
+      shift 1
+      ;;
+    -l | --lang)
+      lualatex_cmd+=" --lang=$2"
+      shift 2
+      ;;
+    --pdfversion)
+      lualatex_cmd+=" --pdfversion=$2"
+      shift 2
+      ;;
+    --pdfstandard)
+      lualatex_cmd+=" --pdfstandard=$2"
+      shift 2
+      ;;
+    -u | --uncompress)
+      lualatex_cmd+=" --uncompress"
+      shift 1
+      ;;
+    --draftmode)
+      lualatex_cmd+=" --draftmode"
+      shift 1
+      ;;
+    --final)
+      lualatex_cmd+=" --final"
+      shift 1
+      ;;
+    --interaction)
+      lualatex_cmd+=" --interaction=$2"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      >&2 echo Unsupported option: $1
+      usage
+      ;;
+  esac
+done
+
+# Check for the correct number of arguments
+if [ "$#" -eq "1" ]; then
+  main_file="$1"
+else
+  >&2 echo "Error: Missing arguments"
+  usage
+fi
+
+# Make output path absolute and ensure it exists
+output_dir=$(realpath "$output_dir")
+lualatex_cmd+=" --output-directory=$output_dir"
+mkdir -p "$output_dir"
+
+# Format recipe options
+for recipe in "${recipe_files[@]}"; do
+  lualatex_cmd+=" --recipe=$recipe"
+done
+
+# Format payload options
+for payload in "${payload_files[@]}"; do
+  lualatex_cmd+=" --payload=$payload"
+done
+
+# Append the main file to the lualatex command
+lualatex_cmd+=" $main_file"
+
+# Execute the lualatex command
+echo Running \'$lualatex_cmd\'
+exec $lualatex_cmd

@@ -1,0 +1,5 @@
+chomp(my $init_file = `kpsewhich la-lua-opts-init.lua`);
+$pdf_mode = 4;
+$lualatex = "lualatex --lua=$init_file %O %S";
+$lualatex = "$lualatex --final --pdfversion=2.0";
+$out_dir = 'build';

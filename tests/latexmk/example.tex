@@ -1,0 +1,14 @@
+\documentclass{article}
+\usepackage{la-lua-opts}
+
+\directlua{
+local lp = require('lua-placeholders')
+if not lp.strict then
+    tex.error('Error: Strict mode is not set')
+    os.exit(1)
+end
+}
+
+\begin{document}
+Example
+\end{document}

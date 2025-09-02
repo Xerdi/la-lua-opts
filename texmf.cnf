@@ -1,0 +1,16 @@
+
+shell_escape_commands = \
+bibtex,bibtex8,\
+extractbb,\
+gregorio,\
+kpsewhich,\
+l3sys-query,\
+latexminted,\
+makeindex,\
+memoize-extract.pl,\
+memoize-extract.py,\
+repstopdf,\
+r-mpost,\
+texosquery-jre8,\
+git,\
+
