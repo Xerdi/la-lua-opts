@@ -1,3 +1,5 @@
+-- Public domain.
+-- Originally written by Erik Nijenhuis, 2025.
 
 modules = modules or {}
 modules.xdp = {

@@ -1,3 +1,5 @@
+-- Public domain.
+-- Originally written by Erik Nijenhuis, 2025.
 
 texconfig = texconfig or require('texconfig')
 texio = texio or require('texio')

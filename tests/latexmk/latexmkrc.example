@@ -1,3 +1,5 @@
+# Public domain.
+# Originally written by Erik Nijenhuis, 2025.
 chomp(my $init_file = `kpsewhich la-lua-opts-init.lua`);
 $pdf_mode = 4;
 $lualatex = "lualatex --lua=$init_file %O %S";

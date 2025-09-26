@@ -169,4 +169,5 @@ Tests assume a fully installed TeX Live distribution.
 
 ## License
 
-Copyright 2025 Xerdi. See source headers.
+Public domain.
+Originally written by Erik Nijenhuis, 2025.

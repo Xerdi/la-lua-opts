@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Public domain.
+# Originally written by Erik Nijenhuis, 2025.
 set -euo pipefail
 shopt -s nullglob
 
